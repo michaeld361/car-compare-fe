@@ -177,7 +177,7 @@ function generateDummySpecs(make: string, model: string): any {
 
   // Economy brands get lower specs
   const economyBrands = ['Toyota', 'Honda', 'Nissan', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Ford', 'Chevrolet', 'Dodge'];
-  const isEconomy = economyBrands.some(brand => make.toUpperCase().includes(brand.toUpperCase()));
+  const _isEconomy = economyBrands.some(brand => make.toUpperCase().includes(brand.toUpperCase()));
 
   // SUV/Crossover models (check model name)
   const isSUV = /X\d|Q\d|RX|GX|NX|UX|XT|CX|RAV|CR-V|PILOT|EXPLORER|TAHOE|SUBURBAN|YUKON|ESCALADE|NAVIGATOR|EXPEDITION/i.test(model);
