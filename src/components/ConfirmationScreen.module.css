@@ -1,0 +1,168 @@
+.confirmationScreen {
+  background: var(--infiniti-navy);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4% 0 5rem 0;
+  overflow-y: auto;
+}
+
+.logoBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--infiniti-navy);
+  padding: 1.25rem 4%;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.logo {
+  width: 3.4375rem;
+  height: auto;
+  color: var(--infiniti-white);
+}
+
+.confirmationContent {
+  width: 92%;
+  max-width: 31.25rem;
+  text-align: center;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 8rem);
+  padding-top: 6rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 120%;
+  margin: 0 0 2rem 0;
+}
+
+.detectedCarCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin: 2rem 0 1rem 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.detectedThumbnailCircle {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  background: var(--infiniti-gray);
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: var(--infiniti-navy);
+  font-weight: 700;
+}
+
+.detectedInfo h2 {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 0.625rem;
+}
+
+.detectedYear {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.confidence {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  font-weight: 400;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirmationActions {
+  margin-top: auto;
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.backArrowBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--infiniti-white);
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.backArrowBtn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.backArrowBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.button {
+  width: 70%;
+  max-width: 20rem;
+  color: white;
+  border: 1px solid white;
+  display: flex;
+  padding: 0.7375rem 1.5rem;
+  border-radius: 2.5rem;
+  font-size: 1rem;
+  background-color: var(--infiniti-button-bg);
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background-color: var(--infiniti-white);
+  color: var(--infiniti-navy);
+}
+
+.chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
+  margin-left: 0.5rem;
+}

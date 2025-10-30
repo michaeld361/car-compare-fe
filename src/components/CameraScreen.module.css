@@ -1,0 +1,206 @@
+.cameraScreen {
+  background: var(--infiniti-navy);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  position: relative;
+}
+
+.logoBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: transparent;
+  padding: 1.25rem 4%;
+  z-index: 1000;
+}
+
+.logo {
+  width: 3.4375rem;
+  height: auto;
+  color: var(--infiniti-white);
+}
+
+.cameraContainer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.cameraFeed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cameraOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.cameraInstructions {
+  position: absolute;
+  top: 6rem;
+  left: 4%;
+  right: 4%;
+  background: rgba(2, 11, 36, 0.9);
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  backdrop-filter: blur(10px);
+}
+
+.targetFrame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 25rem;
+  height: 15.625rem;
+  border: 2px solid var(--infiniti-white);
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 9999px rgba(2, 11, 36, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+.targetCorners {
+  position: absolute;
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 3px solid var(--infiniti-white);
+}
+
+.cornerTl {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.cornerTr {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.cornerBl {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+.cornerBr {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+.scanningIndicator {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(2, 11, 36, 0.9);
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  backdrop-filter: blur(10px);
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--infiniti-white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cameraControls {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  pointer-events: all;
+  z-index: 100;
+}
+
+.iconBtn {
+  background: rgba(2, 11, 36, 0.8);
+  border: 2px solid var(--infiniti-white);
+  color: var(--infiniti-white);
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.iconBtn svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: currentColor;
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: rgba(2, 11, 36, 0.95);
+  transform: scale(1.05);
+}
+
+.iconBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.captureBtn {
+  width: 4.5rem;
+  height: 4.5rem;
+  background: var(--infiniti-white);
+  border-color: var(--infiniti-navy);
+}
+
+.captureBtn svg {
+  width: 2rem;
+  height: 2rem;
+  fill: var(--infiniti-navy);
+}
+
+.captureBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+}

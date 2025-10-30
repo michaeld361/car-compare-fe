@@ -1,0 +1,290 @@
+.comparisonScreen {
+  background: var(--infiniti-navy);
+  width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 4% 4% 5rem 4%;
+  overflow-y: auto;
+}
+
+.logoBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--infiniti-navy);
+  padding: 1.25rem 4%;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.logo {
+  width: 3.4375rem;
+  height: auto;
+  color: var(--infiniti-white);
+}
+
+.comparisonHeader {
+  text-align: center;
+  padding: 2rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  margin-top: 5.5rem;
+  animation: fadeIn 0.4s ease;
+}
+
+.comparisonHeader h1 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.75rem;
+  font-weight: 300;
+}
+
+.vsContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.carThumbnail {
+  flex: 1;
+  text-align: center;
+}
+
+.carThumbnailCircle {
+  width: 5rem;
+  height: 5rem;
+  background: var(--infiniti-gray);
+  border-radius: 50%;
+  margin: 0 auto 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--infiniti-navy);
+}
+
+.carThumbnailName {
+  font-size: 0.875rem;
+  font-weight: 300;
+}
+
+.vsBadge {
+  font-size: 1.5rem;
+  font-weight: 300;
+}
+
+.comparisonGrid {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.comparisonCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border-left: 3px solid var(--infiniti-white);
+  animation: slideUp 0.4s ease;
+  animation-fill-mode: backwards;
+}
+
+.comparisonCard:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.comparisonCard:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.comparisonCard:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.comparisonCard:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.comparisonCard:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.comparisonTitle {
+  font-size: 1.125rem;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.02rem;
+}
+
+.comparisonText {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.comparisonText b {
+  font-weight: 600;
+  color: var(--infiniti-white);
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.featureList li {
+  padding: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.9);
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.featureList li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--infiniti-white);
+  font-weight: 700;
+}
+
+.statComparison {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.infinitiValue {
+  color: var(--infiniti-white);
+  font-weight: 400;
+}
+
+.ctaCard {
+  border-left: 3px solid var(--infiniti-white);
+  background: var(--infiniti-white);
+}
+
+.ctaCard .comparisonTitle {
+  color: var(--infiniti-navy);
+}
+
+.ctaCard .comparisonText {
+  color: rgba(2, 11, 36, 0.8);
+}
+
+.testDriveIcon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+}
+
+.testDriveIcon svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--infiniti-navy);
+}
+
+.dealershipAddress {
+  font-size: 0.75rem;
+  color: rgba(2, 11, 36, 0.7);
+  font-weight: 300;
+  line-height: 1.5;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(2, 11, 36, 0.1);
+  margin-bottom: 1rem;
+}
+
+.dealershipPhone {
+  font-weight: 400;
+  color: rgba(2, 11, 36, 0.85);
+}
+
+.testDriveActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.actionIconBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--infiniti-navy);
+  color: var(--infiniti-white);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.02rem;
+  flex: 1;
+  min-width: 5.5rem;
+  max-width: 7rem;
+  min-height: 5rem;
+  justify-content: center;
+}
+
+.actionIconBtn:hover {
+  background: rgba(2, 11, 36, 0.85);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(2, 11, 36, 0.3);
+}
+
+.actionIconBtn:active {
+  transform: translateY(0);
+}
+
+.actionIconBtn svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: var(--infiniti-white);
+}

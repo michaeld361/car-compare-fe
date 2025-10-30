@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Infiniti InSight - AR Car Compare</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --infiniti-navy:#020B24; --infiniti-gray:#9a9d97; --infiniti-white:#ffffff; --infiniti-button-bg:rgba(1,5,16,0.3); }
+    html, body { margin:0; padding:0; height:100vh; height:100dvh; width:100vw; overflow:hidden; position:fixed; background-color:var(--infiniti-navy); color:var(--infiniti-white); font-family:-apple-system,BlinkMacSystemFont,sans-serif; }
+    .screen { display:none; width:100vw; height:100vh; height:100dvh; position:fixed; top:0; left:0; opacity:0; transition:opacity .4s ease; pointer-events:none; overflow-y:auto; overflow-x:hidden; }
+    .screen.active { display:flex; flex-direction:column; opacity:1; pointer-events:auto; }
+    .overlay { width:100%; height:100%; background:linear-gradient(0deg,rgba(2,11,36,.4) 0%,rgba(2,11,36,.4) 100%); position:absolute; top:0; left:0; pointer-events:none; z-index:1; }
+    .logo-bar { position:fixed; top:0; left:0; right:0; width:100%; background:var(--infiniti-navy); padding:1.25rem 4%; z-index:1000; border-bottom:1px solid rgba(255,255,255,.1); cursor:pointer; }
+    .logo-bar.transparent { background:transparent; border-bottom:none; }
+    .logo { width:3.4375rem; height:auto; }
+    h1 { font-size:2rem; font-weight:300; line-height:120%; margin-left:4%; margin-top:6rem; position:relative; z-index:10; }
+    .body-copy { font-size:1.125rem; font-weight:300; line-height:140%; margin-left:4%; margin-right:4%; position:relative; z-index:10; max-width:92%; margin-top:4%; }
+    .splash-screen { background:var(--infiniti-navy); display:flex; flex-direction:column; justify-content:space-between; }
+    .splash-content-wrapper { flex:1; display:flex; flex-direction:column; justify-content:flex-start; position:relative; z-index:10; }
+    .splash-button-wrapper { flex:0 0 auto; display:flex; align-items:center; justify-content:center; padding:2rem 0 6rem 0; min-height:120px; position:relative; z-index:10; }
+    .carousel-container { width:100%; margin-top:8%; position:relative; z-index:100; padding-left:4%; padding-top:3rem; padding-bottom:20px; }
+    .carousel-wrapper { width:100%; overflow-x:scroll; overflow-y:visible; scrollbar-width:none; scroll-behavior:smooth; position:relative; padding:2rem 0; z-index:100; }
+    .carousel-wrapper::-webkit-scrollbar{ display:none; }
+    .carousel { display:flex; gap:1.5rem; padding:1rem 0; padding-right:50%; align-items:center; }
+    .gallery-circle-button { flex:0 0 auto; width:clamp(200px,35vh,280px); height:clamp(200px,35vh,280px); border-radius:50%; overflow:hidden; display:flex; justify-content:center; align-items:center; background-color:var(--infiniti-white); cursor:pointer; border:3px solid transparent; position:relative; transition:all .3s ease; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; outline:none; }
+    .gallery-circle-button.selected { border-color:var(--infiniti-white); transform:scale(1.08); box-shadow:0 0 40px rgba(255,255,255,.5); }
+    .car-image-placeholder { width:100%; height:100%; background-size:cover; background-position:center; background-repeat:no-repeat; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .gallery-item-wrapper { display:flex; flex-direction:column; align-items:center; gap:1rem; flex:0 0 auto; }
+    .gallery-label { color:var(--infiniti-white); text-align:center; font-size:1rem; font-weight:300; letter-spacing:.02rem; white-space:nowrap; pointer-events:none; }
+    .gallery-circle-button.selected ~ .gallery-label { font-weight:400; }
+    .button { width:70%; max-width:20rem; color:white; border:1px solid white; display:flex; padding:.7375rem 1.5rem; border-radius:2.5rem; font-size:1rem; background-color:var(--infiniti-button-bg); justify-content:space-between; align-items:center; cursor:pointer; transition:all .3s ease; }
+    .button:disabled{ opacity:.5; cursor:not-allowed; }
+    .button:not(:disabled):hover{ background-color:var(--infiniti-white); color:var(--infiniti-navy); }
+    .chevron { width:.5rem; height:.5rem; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:rotate(-45deg); margin-left:.5rem; }
+    @keyframes pulseOpacity { 0%,100%{opacity:.6} 50%{opacity:1} }
+    .pulse-animate{ animation:pulseOpacity 1.5s infinite ease-in-out; }
+    .camera-screen{ background:var(--infiniti-navy); }
+    #camera-container{ position:relative; width:100%; height:100vh; height:100dvh; }
+    #camera-feed{ width:100%; height:100%; object-fit:cover; }
+    .camera-overlay{ position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; }
+    .camera-instructions{ position:absolute; top:6rem; left:4%; right:4%; background:rgba(2,11,36,.9); padding:1rem 1.5rem; border-radius:.5rem; text-align:center; font-size:.875rem; backdrop-filter:blur(10px); }
+    .target-frame{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; max-width:25rem; height:15.625rem; border:2px solid var(--infiniti-white); border-radius:.75rem; box-shadow:0 0 0 9999px rgba(2,11,36,.5); opacity:0; }
+    .target-corners{ position:absolute; width:1.875rem; height:1.875rem; border:3px solid var(--infiniti-white); }
+    .corner-tl{ top:-2px; left:-2px; border-right:none; border-bottom:none; }
+    .corner-tr{ top:-2px; right:-2px; border-left:none; border-bottom:none; }
+    .corner-bl{ bottom:-2px; left:-2px; border-right:none; border-top:none; }
+    .corner-br{ bottom:-2px; right:-2px; border-left:none; border-top:none; }
+    .scanning-indicator{ position:absolute; top:30%; left:50%; transform:translateX(-50%); background:rgba(2,11,36,.9); padding:1rem 2rem; border-radius:3rem; display:flex; align-items:center; gap:.75rem; font-size:.875rem; }
+    .spinner{ width:1.25rem; height:1.25rem; border:3px solid rgba(255,255,255,.3); border-top-color:var(--infiniti-white); border-radius:50%; animation:spin 1s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+    .confidence-badge{ position:absolute; bottom:14rem; left:50%; transform:translateX(-50%); background:var(--infiniti-navy); padding:1.25rem 2rem; border-radius:.75rem; text-align:center; min-width:17.5rem; border:2px solid var(--infiniti-white); }
+    .confidence-percentage{ font-size:2.25rem; font-weight:300; margin-bottom:.5rem; }
+    .matched-car{ font-size:1.125rem; font-weight:300; }
+    .matched-year{ font-size:.875rem; color:rgba(255,255,255,.7); }
+    .camera-controls{ position:absolute; bottom:5rem; left:50%; transform:translateX(-50%); display:flex; gap:1rem; pointer-events:all; }
+    .icon-btn{ background:rgba(2,11,36,.8); border:2px solid var(--infiniti-white); color:var(--infiniti-white); width:3.75rem; height:3.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .3s ease; }
+    .icon-btn svg{ width:1.5rem; height:1.5rem; fill:currentColor; }
+    .icon-btn:disabled{ opacity:.3; }
+    .confirmation-screen{ background:var(--infiniti-navy); padding:4% 0 5rem 0; align-items:center; justify-content:center; }
+    .confirmation-content{ width:92%; max-width:31.25rem; text-align:center; margin:0 auto; display:flex; flex-direction:column; min-height:calc(100vh - 8rem); }
+    .confirmation-content h1{ margin-left:0; }
+    .confirmation-actions{ margin-top:auto; padding:2rem 0; display:flex; flex-direction:column; gap:2rem; align-items:center; }
+    .back-arrow-btn{ background:transparent; border:1px solid rgba(255,255,255,.3); color:var(--infiniti-white); width:3.75rem; height:3.75rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .back-arrow-btn svg{ width:1.5rem; height:1.5rem; fill:currentColor; }
+    .detected-car-card{ background:rgba(255,255,255,.05); border-radius:.75rem; padding:2rem; margin:2rem 0 1rem 0; border:1px solid rgba(255,255,255,.1); }
+    .detected-thumbnail-circle{ width:10rem; height:10rem; border-radius:50%; background:var(--infiniti-gray); margin:0 auto 1.5rem; display:flex; align-items:center; justify-content:center; font-size:.875rem; color:var(--infiniti-navy); font-weight:700; }
+    .detected-info h2{ font-size:1.5rem; font-weight:300; margin-bottom:.625rem; }
+    .detected-year{ color:rgba(255,255,255,.7); font-size:.875rem; }
+    .comparison-screen{ background:var(--infiniti-navy); padding:4% 4% 5rem 4%; }
+    .comparison-header{ text-align:center; padding:2rem 1.25rem; background:rgba(255,255,255,.05); border-radius:.75rem; margin-bottom:2rem; margin-top:5.5rem; }
+    .comparison-header h1{ margin:0 0 1.5rem 0; font-size:1.75rem; }
+    .vs-container{ display:flex; justify-content:space-around; align-items:center; gap:1.25rem; }
+    .car-thumbnail{ flex:1; text-align:center; }
+    .car-thumbnail-circle{ width:5rem; height:5rem; background:var(--infiniti-gray); border-radius:50%; margin:0 auto .625rem; display:flex; align-items:center; justify-content:center; font-size:.625rem; font-weight:700; }
+    .car-thumbnail-name{ font-size:.875rem; font-weight:300; }
+    .vs-badge{ font-size:1.5rem; font-weight:300; }
+    .comparison-grid{ display:grid; gap:1.25rem; margin-bottom:2rem; }
+    .comparison-card{ background:rgba(255,255,255,.05); border-radius:.75rem; padding:1.5rem; border-left:3px solid var(--infiniti-white); }
+    .comparison-card.cta-card{ border-left:3px solid var(--infiniti-white); background:var(--infiniti-white); }
+    .cta-card .comparison-title{ color:var(--infiniti-navy); }
+    .cta-card .comparison-text{ color:rgba(2,11,36,0.8); }
+    .test-drive-icon { width:3rem; height:3rem; margin:0 auto 1rem; }
+    .test-drive-icon svg { width:100%; height:100%; fill:var(--infiniti-navy); }
+    .dealership-address { font-size:.75rem; color:rgba(2,11,36,0.7); font-family:'Infiniti Brand'; font-weight:300; line-height:1.5; margin-top:.75rem; padding-top:.75rem; border-top:1px solid rgba(2,11,36,0.1); margin-bottom:1rem; }
+    #dealership-phone { font-weight:400; color:rgba(2,11,36,0.85); }
+    .test-drive-actions { display:flex; gap:.75rem; justify-content:center; margin-top:1.25rem; flex-wrap:wrap; }
+    .action-icon-btn { display:flex; flex-direction:column; align-items:center; gap:.5rem; padding:1rem; background:var(--infiniti-navy); color:var(--infiniti-white); border:none; border-radius:.5rem; cursor:pointer; transition:all .3s ease; text-decoration:none; font-family:'Infiniti Brand'; font-size:.75rem; font-weight:300; letter-spacing:.02rem; flex:1; min-width:5.5rem; max-width:7rem; min-height:5rem; justify-content:center; }
+    .action-icon-btn:hover { background:rgba(2,11,36,0.85); transform:translateY(-2px); box-shadow:0 4px 12px rgba(2,11,36,0.3); }
+    .action-icon-btn:active { transform:translateY(0); }
+    .action-icon-btn svg { width:1.75rem; height:1.75rem; fill:var(--infiniti-white); }
+    .comparison-title{ font-size:1.125rem; font-weight:300; margin-bottom:.75rem; }
+    .comparison-text{ font-size:.875rem; line-height:1.6; color:rgba(255,255,255,.8); margin-bottom:1rem; }
+    .stat-comparison{ display:flex; justify-content:space-between; padding:.75rem; background:rgba(255,255,255,.05); border-radius:.375rem; }
+    .stat-label{ font-size:.75rem; color:rgba(255,255,255,.6); margin-bottom:.25rem; }
+    .stat-value{ font-size:.875rem; font-weight:300; }
+    .infiniti-value{ font-weight:400; }
+    .action-buttons{ display:flex; flex-direction:column; gap:1.5rem; align-items:center; }
+    .hidden{ display:none !important; }
+    .disclaimer{ position:fixed; bottom:0; left:0; right:0; padding:.75rem 4%; background:rgba(2,11,36,.95); border-top:1px solid rgba(255,255,255,.1); z-index:100; }
+    .disclaimer-text{ font-size:.625rem; font-weight:300; color:rgba(255,255,255,.6); text-align:center; }
+    
+    /* Desktop file upload styles */
+    .upload-zone { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; max-width:30rem; padding:3rem 2rem; background:rgba(2,11,36,.9); border:2px dashed var(--infiniti-white); border-radius:.75rem; text-align:center; cursor:pointer; transition:all .3s ease; backdrop-filter:blur(10px); }
+    .upload-zone:hover { border-color:rgba(255,255,255,.6); background:rgba(2,11,36,.95); }
+    .upload-zone input[type="file"] { display:none; }
+    .upload-icon { width:4rem; height:4rem; margin:0 auto 1.5rem; }
+    .upload-icon svg { width:100%; height:100%; fill:var(--infiniti-white); opacity:.7; }
+    .upload-title { font-size:1.25rem; font-weight:300; margin-bottom:.5rem; }
+    .upload-subtitle { font-size:.875rem; color:rgba(255,255,255,.7); }
+    
+    /* Error feedback styles */
+    .error-overlay { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:85%; max-width:25rem; padding:2rem; background:rgba(2,11,36,.95); border:2px solid rgba(255,100,100,.5); border-radius:.75rem; text-align:center; backdrop-filter:blur(10px); z-index:1000; }
+    .error-icon { width:3rem; height:3rem; margin:0 auto 1rem; }
+    .error-icon svg { width:100%; height:100%; fill:#ff6464; }
+    .error-title { font-size:1.25rem; font-weight:300; margin-bottom:.75rem; color:#ff6464; }
+    .error-message { font-size:.875rem; color:rgba(255,255,255,.8); line-height:1.5; margin-bottom:1.5rem; }
+    .error-actions { display:flex; gap:1rem; justify-content:center; }
+    .error-btn { padding:.625rem 1.5rem; border-radius:2rem; font-size:.875rem; cursor:pointer; transition:all .3s ease; }
+    .error-btn-primary { background:var(--infiniti-white); color:var(--infiniti-navy); border:1px solid var(--infiniti-white); }
+    .error-btn-primary:hover { background:rgba(255,255,255,.9); }
+    .error-btn-secondary { background:transparent; color:var(--infiniti-white); border:1px solid rgba(255,255,255,.3); }
+    .error-btn-secondary:hover { border-color:var(--infiniti-white); }
+    
+    @media (max-width: 767px){ .gallery-circle-button{ width:clamp(240px,65vw,320px); height:clamp(240px,65vw,320px);} h1{font-size:1.75rem;} .body-copy{font-size:1rem;} .gallery-label{font-size:.875rem;} }
+    @media (min-width: 768px){ .comparison-grid{ grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <div class="logo-bar" id="logo-bar" onclick="resetToHome()">
+    <svg class="logo" width="108" height="51" viewBox="0 0 108 51" fill="none">
+      <path d="M53.7843 1.32572C28.8513 1.32572 8.75219 11.5568 8.75219 23.8515C8.75219 30.8202 16.9563 36.2672 29.3761 39.2875L51.0729 13.7933H53.7843L35.0087 51C14.5656 47.3917 0 38.0021 0 26.5721C0 11.8739 24.0933 0 53.7843 0C83.4752 0 107.569 11.8739 107.569 26.5721C107.569 38.0021 93.0029 47.3917 72.5598 51L53.7843 13.7933H56.4956L78.1866 39.2875C90.6122 36.2672 98.8105 30.8202 98.8105 23.8515C98.8105 11.5568 78.7114 1.32572 53.7784 1.32572H53.7843Z" fill="white"/>
+    </svg>
+  </div>
+
+  <!-- Splash Screen -->
+  <div id="splash" class="screen active splash-screen">
+    <div class="overlay"></div>
+    <div class="splash-content-wrapper">
+      <h1>Empower<br>Your Choice</h1>
+      <p class="body-copy">See a car you like? Point your camera and discover how it compares to INFINITI in seconds.</p>
+
+      <div class="carousel-container">
+        <div class="carousel-wrapper" id="carousel-wrapper">
+          <div class="carousel" id="car-carousel">
+            <div class="gallery-item-wrapper">
+              <div class="gallery-label">QX55</div>
+              <div class="gallery-circle-button" data-model="QX55">
+                <div class="car-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&q=80');"></div>
+              </div>
+            </div>
+            <div class="gallery-item-wrapper">
+              <div class="gallery-label">QX60</div>
+              <div class="gallery-circle-button" data-model="QX60">
+                <div class="car-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&q=80');"></div>
+              </div>
+            </div>
+            <div class="gallery-item-wrapper">
+              <div class="gallery-label">QX80</div>
+              <div class="gallery-circle-button" data-model="QX80">
+                <div class="car-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&q=80');"></div>
+              </div>
+            </div>
+            <div class="gallery-item-wrapper">
+              <div class="gallery-label">Q50</div>
+              <div class="gallery-circle-button" data-model="Q50">
+                <div class="car-image-placeholder" style="background-image: url('https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80');"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="splash-button-wrapper">
+      <button class="button pulse-animate" id="compare-btn" disabled>
+        <span id="button-text">Select a Model to Continue</span>
+        <span class="chevron"></span>
+      </button>
+    </div>
+
+    <div class="disclaimer">
+      <p class="disclaimer-text">Demonstration experience. Vehicle specifications and comparisons are estimates for illustrative purposes. Please consult your local INFINITI dealership for accurate specifications.</p>
+    </div>
+  </div>
+
+  <!-- Camera/Upload Screen -->
+  <div id="camera" class="screen camera-screen">
+    <!-- Mobile: Camera -->
+    <div id="mobile-camera" class="hidden">
+      <div id="camera-container">
+        <video id="camera-feed" autoplay playsinline muted></video>
+        <div class="camera-overlay">
+          <div class="camera-instructions">Point at a vehicle and hold steady</div>
+          <div class="target-frame">
+            <div class="target-corners corner-tl"></div>
+            <div class="target-corners corner-tr"></div>
+            <div class="target-corners corner-bl"></div>
+            <div class="target-corners corner-br"></div>
+          </div>
+          <div id="scanning-indicator" class="scanning-indicator hidden">
+            <div class="spinner"></div>
+            <span>Scanning vehicle...</span>
+          </div>
+          <div class="confidence-badge hidden" id="confidence-badge">
+            <div class="confidence-percentage" id="confidence-percent">95%</div>
+            <div class="matched-car" id="matched-car-name">BMW X5</div>
+            <div class="matched-year" id="matched-car-year">2023</div>
+          </div>
+          <div class="camera-controls">
+            <button class="icon-btn" id="rescan-btn">
+              <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+            <button class="icon-btn" id="lock-btn" disabled>
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </button>
+          </div>
+          
+          <!-- Error Overlay -->
+          <div id="error-overlay" class="error-overlay hidden">
+            <div class="error-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div class="error-title">No Vehicle Detected</div>
+            <div class="error-message">We couldn't identify a vehicle in this image. Please try again with a clearer photo of a car.</div>
+            <div class="error-actions">
+              <button class="error-btn error-btn-primary" onclick="hideError(); resetScan();">Try Again</button>
+              <button class="error-btn error-btn-secondary" onclick="hideError(); resetToHome();">Go Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Desktop: File Upload -->
+    <div id="desktop-upload" class="hidden">
+      <div id="camera-container" style="background:var(--infiniti-navy);">
+        <label for="file-input" class="upload-zone" id="upload-zone">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+          </div>
+          <div class="upload-title">Upload Vehicle Photo</div>
+          <div class="upload-subtitle">Click to select or drag & drop an image</div>
+          <input type="file" id="file-input" accept="image/*" />
+        </label>
+        
+        <div class="camera-overlay">
+          <div id="scanning-indicator-desktop" class="scanning-indicator hidden">
+            <div class="spinner"></div>
+            <span>Analyzing vehicle...</span>
+          </div>
+          <div class="confidence-badge hidden" id="confidence-badge-desktop">
+            <div class="confidence-percentage" id="confidence-percent-desktop">95%</div>
+            <div class="matched-car" id="matched-car-name-desktop">BMW X5</div>
+            <div class="matched-year" id="matched-car-year-desktop">2023</div>
+          </div>
+          <div class="camera-controls">
+            <button class="icon-btn" id="upload-again-btn">
+              <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            </button>
+            <button class="icon-btn" id="lock-btn-desktop" disabled>
+              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </button>
+          </div>
+          
+          <!-- Error Overlay Desktop -->
+          <div id="error-overlay-desktop" class="error-overlay hidden">
+            <div class="error-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div class="error-title">No Vehicle Detected</div>
+            <div class="error-message">We couldn't identify a vehicle in this image. Please upload a different photo with a clear view of a car.</div>
+            <div class="error-actions">
+              <button class="error-btn error-btn-primary" onclick="hideErrorDesktop(); document.getElementById('file-input').click();">Upload Another</button>
+              <button class="error-btn error-btn-secondary" onclick="hideErrorDesktop(); resetToHome();">Go Back</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="disclaimer">
+      <p class="disclaimer-text">Demonstration experience. Vehicle specifications and comparisons are estimates for illustrative purposes. Please consult your local INFINITI dealership for accurate specifications.</p>
+    </div>
+  </div>
+
+  <!-- Confirmation Screen -->
+  <div id="confirmation" class="screen confirmation-screen">
+    <div class="overlay"></div>
+    <div class="confirmation-content">
+      <h1>Vehicle Detected</h1>
+      <div class="detected-car-card">
+        <div class="detected-thumbnail-circle">CAR</div>
+        <div class="detected-info">
+          <h2 id="confirmed-car-name">BMW X5</h2>
+          <p class="detected-year" id="confirmed-car-year">2023</p>
+        </div>
+      </div>
+      <p class="body-copy" style="text-align: center;">Ready to compare with INFINITI <span id="selected-infiniti-model">QX55</span>?</p>
+      <div class="confirmation-actions">
+        <button class="button pulse-animate" id="proceed-comparison-btn">
+          <span>View Comparison</span>
+          <span class="chevron"></span>
+        </button>
+        <button class="back-arrow-btn" id="scan-again-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <p class="disclaimer-text">Demonstration experience. Vehicle specifications and comparisons are estimates for illustrative purposes. Please consult your local INFINITI dealership for accurate specifications.</p>
+    </div>
+  </div>
+
+  <!-- Comparison Screen -->
+  <div id="comparison" class="screen comparison-screen">
+    <div class="comparison-header">
+      <h1>The Smarter Choice</h1>
+      <div class="vs-container">
+        <div class="car-thumbnail">
+          <div class="car-thumbnail-circle">INF</div>
+          <div class="car-thumbnail-name" id="infiniti-model-name">QX55</div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div class="car-thumbnail">
+          <div class="car-thumbnail-circle">COMP</div>
+          <div class="car-thumbnail-name" id="competitor-model-name">BMW X5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comparison-grid" id="comparison-grid"></div>
+
+    <div class="action-buttons">
+      <button class="button" id="start-again-btn">
+        <span>Compare Another Vehicle</span>
+        <span class="chevron"></span>
+      </button>
+    </div>
+
+    <div class="disclaimer">
+      <p class="disclaimer-text">Demonstration experience. Vehicle specifications and comparisons are estimates for illustrative purposes. Please consult your local INFINITI dealership for accurate specifications.</p>
+    </div>
+  </div>
+
+  <script>
+  const CAR_ID_SERVER_URL = 'http://127.0.0.1:8787';
+
+  let appState = {
+    selectedInfinitiModel: null,
+    detectedCar: null,
+    isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
+    cameraStream: null
+  };
+
+  const infinitiData = {
+    QX55: { model:'QX55', category:'Luxury Crossover Coupe', cargoVolume:54.1, cargoVolumeBehind2nd:26.9, mpgCity:22, mpgHighway:28, mpgCombined:25, msrp:50150, seating:5, horsepower:268, torque:280, engine:'2.0L VC-Turbo I4', acceleration:6.4, features:['ProPILOT Assist','Dual Touchscreen Display','Around View Monitor','Bose 16-Speaker Audio'] },
+    QX60: { model:'QX60', category:'3-Row Luxury SUV', cargoVolume:75.4, cargoVolumeBehind2nd:41.6, cargoVolumeBehind3rd:14.5, mpgCity:21, mpgHighway:26, mpgCombined:23, msrp:49650, seating:7, horsepower:295, torque:270, engine:'3.5L V6', acceleration:6.2, towingCapacity:6000, features:['ProPILOT Assist with Navi-link','12.3" Touchscreen','Bose 17-Speaker Audio','Panoramic Moonroof'] },
+    QX80: { model:'QX80', category:'Full-Size Luxury SUV', cargoVolume:95.1, cargoVolumeBehind2nd:49.6, cargoVolumeBehind3rd:16.6, mpgCity:14, mpgHighway:20, mpgCombined:16, msrp:74150, seating:8, horsepower:400, torque:413, engine:'5.6L V8', acceleration:6.3, towingCapacity:8500, features:['Hydraulic Body Motion Control','Bose 17-Speaker Audio','Around View Monitor','Smart Rear View Mirror'] },
+    Q50:  { model:'Q50', category:'Luxury Sports Sedan', trunkVolume:13.5, mpgCity:20, mpgHighway:29, mpgCombined:23, msrp:43050, seating:5, horsepower:300, torque:295, engine:'3.0L Twin-Turbo V6', acceleration:5.0, features:['Bose 16-Speaker Audio','Around View Monitor','Dynamic Digital Suspension','Wireless Apple CarPlay'] }
+  };
+
+  const competitorDatabase = {
+    'BMW X4': { cargoVolume: 50.5, mpgCombined: 24, msrp: 56000, seating: 5, horsepower: 248, acceleration: 6.1, category: 'crossover_coupe' },
+    'Mercedes GLC Coupe': { cargoVolume: 49.4, mpgCombined: 23, msrp: 58000, seating: 5, horsepower: 255, acceleration: 6.3, category: 'crossover_coupe' },
+    'Audi Q5 Sportback': { cargoVolume: 53.1, mpgCombined: 24, msrp: 54000, seating: 5, horsepower: 261, acceleration: 5.9, category: 'crossover_coupe' },
+    'BMW X6': { cargoVolume: 59.7, mpgCombined: 22, msrp: 68000, seating: 5, horsepower: 335, acceleration: 5.3, category: 'crossover_coupe' },
+    'Acura MDX': { cargoVolume: 71.4, mpgCombined: 22, msrp: 50000, seating: 7, horsepower: 290, acceleration: 6.4, category: 'three_row' },
+    'Audi Q7': { cargoVolume: 69.6, mpgCombined: 21, msrp: 59000, seating: 7, horsepower: 261, acceleration: 6.9, category: 'three_row' },
+    'BMW X5': { cargoVolume: 72.3, mpgCombined: 23, msrp: 62000, seating: 7, horsepower: 335, acceleration: 5.5, category: 'three_row' },
+    'Volvo XC90': { cargoVolume: 85.7, mpgCombined: 23, msrp: 58000, seating: 7, horsepower: 295, acceleration: 6.2, category: 'three_row' },
+    'Lexus RX L': { cargoVolume: 58.5, mpgCombined: 24, msrp: 53000, seating: 7, horsepower: 295, acceleration: 7.2, category: 'three_row' },
+    'Cadillac Escalade': { cargoVolume: 94.2, mpgCombined: 17, msrp: 82000, seating: 8, horsepower: 420, acceleration: 6.1, category: 'full_size' },
+    'BMW X7': { cargoVolume: 90.4, mpgCombined: 21, msrp: 79000, seating: 7, horsepower: 335, acceleration: 6.1, category: 'full_size' },
+    'Mercedes GLS': { cargoVolume: 84.7, mpgCombined: 20, msrp: 81000, seating: 7, horsepower: 362, acceleration: 5.9, category: 'full_size' },
+    'Land Rover Range Rover': { cargoVolume: 68.6, mpgCombined: 19, msrp: 98000, seating: 7, horsepower: 395, acceleration: 5.4, category: 'full_size' },
+    'Lincoln Navigator': { cargoVolume: 103.3, mpgCombined: 18, msrp: 83000, seating: 8, horsepower: 440, acceleration: 5.9, category: 'full_size' },
+    'BMW 3 Series': { trunkVolume: 13.0, mpgCombined: 28, msrp: 44000, seating: 5, horsepower: 255, acceleration: 5.6, category: 'sport_sedan' },
+    'Mercedes C-Class': { trunkVolume: 12.6, mpgCombined: 27, msrp: 45000, seating: 5, horsepower: 255, acceleration: 5.9, category: 'sport_sedan' },
+    'Audi A4': { trunkVolume: 13.0, mpgCombined: 28, msrp: 40000, seating: 5, horsepower: 201, acceleration: 6.8, category: 'sport_sedan' },
+    'Genesis G70': { trunkVolume: 10.5, mpgCombined: 25, msrp: 40000, seating: 5, horsepower: 252, acceleration: 6.0, category: 'sport_sedan' },
+    'Lexus IS': { trunkVolume: 10.8, mpgCombined: 26, msrp: 41000, seating: 5, horsepower: 241, acceleration: 7.0, category: 'sport_sedan' },
+    'BMW': { cargoVolume: 60.0, mpgCombined: 24, msrp: 58000, seating: 5, horsepower: 300, acceleration: 5.8, category: 'generic' },
+    'Mercedes': { cargoVolume: 58.0, mpgCombined: 23, msrp: 60000, seating: 5, horsepower: 310, acceleration: 5.7, category: 'generic' },
+    'Audi': { cargoVolume: 62.0, mpgCombined: 25, msrp: 56000, seating: 5, horsepower: 280, acceleration: 6.0, category: 'generic' },
+    'Lexus': { cargoVolume: 55.0, mpgCombined: 26, msrp: 50000, seating: 5, horsepower: 295, acceleration: 6.5, category: 'generic' },
+    'Acura': { cargoVolume: 68.0, mpgCombined: 23, msrp: 48000, seating: 7, horsepower: 290, acceleration: 6.3, category: 'generic' },
+    'Volvo': { cargoVolume: 70.0, mpgCombined: 24, msrp: 54000, seating: 7, horsepower: 295, acceleration: 6.4, category: 'generic' },
+    'Cadillac': { cargoVolume: 88.0, mpgCombined: 18, msrp: 78000, seating: 8, horsepower: 400, acceleration: 6.2, category: 'generic' },
+    'Lincoln': { cargoVolume: 95.0, mpgCombined: 19, msrp: 80000, seating: 8, horsepower: 420, acceleration: 6.0, category: 'generic' },
+    'Genesis': { cargoVolume: 12.0, mpgCombined: 26, msrp: 42000, seating: 5, horsepower: 260, acceleration: 6.2, category: 'generic' },
+    'Land Rover': { cargoVolume: 70.0, mpgCombined: 20, msrp: 90000, seating: 7, horsepower: 380, acceleration: 5.8, category: 'generic' }
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initCarousel();
+    initButtons();
+    initUpload();
+  });
+
+  function initCarousel() {
+    const wrapper = document.getElementById('carousel-wrapper');
+    const cards = document.querySelectorAll('.gallery-circle-button');
+    const compareBtn = document.getElementById('compare-btn');
+    const buttonText = document.getElementById('button-text');
+
+    cards.forEach((card) => {
+      card.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        cards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        appState.selectedInfinitiModel = card.dataset.model;
+        compareBtn.disabled = false;
+        compareBtn.classList.remove('pulse-animate');
+        buttonText.textContent = `Compare with ${appState.selectedInfinitiModel}`;
+
+        const cardLeft = card.offsetLeft;
+        const cardWidth = card.offsetWidth;
+        const wrapperWidth = wrapper.offsetWidth;
+        const scrollPos = cardLeft - (wrapperWidth / 2) + (cardWidth / 2);
+
+        wrapper.scrollTo({ left: Math.max(0, scrollPos), behavior: 'smooth' });
+      });
+    });
+  }
+
+  function initButtons() {
+    document.getElementById('compare-btn').addEventListener('click', startCameraOrUpload);
+    document.getElementById('rescan-btn').addEventListener('click', resetScan);
+    document.getElementById('lock-btn').addEventListener('click', confirmSelection);
+    document.getElementById('upload-again-btn').addEventListener('click', () => document.getElementById('file-input').click());
+    document.getElementById('lock-btn-desktop').addEventListener('click', confirmSelection);
+    document.getElementById('scan-again-btn').addEventListener('click', () => showScreen('camera'));
+    document.getElementById('proceed-comparison-btn').addEventListener('click', showComparison);
+    document.getElementById('start-again-btn').addEventListener('click', resetToHome);
+  }
+
+  function initUpload() {
+    const fileInput = document.getElementById('file-input');
+    const uploadZone = document.getElementById('upload-zone');
+
+    fileInput.addEventListener('change', handleFileSelect);
+    
+    // Drag & drop
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.style.borderColor = 'var(--infiniti-white)';
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.style.borderColor = 'rgba(255,255,255,0.5)';
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.style.borderColor = 'rgba(255,255,255,0.5)';
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect({ target: fileInput });
+      }
+    });
+  }
+
+  async function startCameraOrUpload() {
+    showScreen('camera');
+    
+    if (appState.isMobile) {
+      document.getElementById('mobile-camera').classList.remove('hidden');
+      document.getElementById('desktop-upload').classList.add('hidden');
+      startCamera();
+    } else {
+      document.getElementById('mobile-camera').classList.add('hidden');
+      document.getElementById('desktop-upload').classList.remove('hidden');
+    }
+  }
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        audio: false
+      });
+
+      appState.cameraStream = stream;
+      const videoElement = document.getElementById('camera-feed');
+      videoElement.srcObject = stream;
+
+      await new Promise((resolve) => {
+        videoElement.onloadedmetadata = () => {
+          videoElement.play().then(resolve).catch(resolve);
+        };
+      });
+
+      document.querySelector('.target-frame').style.opacity = '1';
+      setTimeout(detectCarFromCamera, 2000);
+    } catch (err) {
+      console.error('Camera error:', err);
+      alert('Camera access is required. Please enable camera permissions.');
+      resetToHome();
+    }
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('upload-zone').style.display = 'none';
+    document.getElementById('scanning-indicator-desktop').classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const blob = await (await fetch(event.target.result)).blob();
+        await detectCarFromImage(blob, true);
+      } catch (error) {
+        handleDetectError(error, true);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function detectCarFromCamera() {
+    document.getElementById('scanning-indicator').classList.remove('hidden');
+    try {
+      const video = document.getElementById('camera-feed');
+
+      if (!video.videoWidth || !video.videoHeight) {
+        throw new Error('Camera not ready (no video frames yet).');
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+
+      if (canvas.toBlob) {
+        canvas.toBlob(async (blob) => {
+          try {
+            await detectCarFromImage(blob, false);
+          } catch (e) {
+            handleDetectError(e, false);
+          }
+        }, 'image/jpeg', 0.85);
+      } else {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const blob = await (await fetch(dataUrl)).blob();
+        await detectCarFromImage(blob, false);
+      }
+    } catch (error) {
+      handleDetectError(error, false);
+    }
+  }
+
+  async function detectCarFromImage(blob, isDesktop) {
+    if (!blob || !blob.size) throw new Error('Failed to capture image.');
+
+    // Looser box thresholds + largest box (matches your working curl)
+    const commonBoxParams = {
+      box_select: 'largest',
+      box_min_height: '60',
+      box_min_width: '60',
+      box_min_ratio: '0.5',
+      box_max_ratio: '4',
+      box_offset: '0'
+    };
+
+    const attempts = [
+      { features: 'mmg,color', region: 'EU',  ...commonBoxParams },
+      { features: 'mm,color',  region: 'EU',  ...commonBoxParams },
+      { features: 'mm',        region: 'DEF', ...commonBoxParams }
+    ];
+
+    const detected = await tryDetectWithFallback(blob, attempts);
+
+    if (!detected || !detected.make || /unknown/i.test(detected.make)) {
+      throw new Error('No make/model detected after fallbacks.');
+    }
+
+    displayDetectedCar(detected, isDesktop);
+  }
+
+  async function tryDetectWithFallback(blob, attemptList) {
+    let lastError;
+    for (const params of attemptList) {
+      try {
+        const qs = new URLSearchParams(params);
+        const requestUrl = `${CAR_ID_SERVER_URL}/recognize?${qs}`;
+
+        console.group('🚗 CarNET API Request');
+        console.log('📍 Endpoint:', requestUrl);
+        console.log('📦 Image blob size:', blob.size, 'bytes');
+        console.log('🎯 Query parameters:', params);
+        console.groupEnd();
+
+        const form = new FormData();
+        form.append('image', blob, 'frame.jpg');
+
+        const t0 = performance.now();
+        const response = await fetch(requestUrl, { method: 'POST', body: form });
+        const t1 = performance.now();
+
+        console.group('📡 CarNET API Response');
+        console.log('✅ Status:', response.status, response.statusText);
+        console.log('⏱️ Response time:', (t1 - t0).toFixed(2), 'ms');
+        console.log('📋 Headers:', Object.fromEntries(response.headers.entries()));
+        console.groupEnd();
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Upstream ${response.status}: ${text}`);
+        }
+
+        const data = await response.json();
+        if (data?.meta?.parameters) {
+          console.log('🔧 Upstream parameters echo:', data.meta.parameters);
+        }
+
+        const parsed = parseCarNetResponse(data);
+        if (parsed && parsed.make && !/unknown/i.test(parsed.make)) return parsed;
+
+        lastError = new Error('Empty mm/mmg arrays or unselected box');
+      } catch (err) {
+        console.warn('Attempt failed with params:', params, err);
+        lastError = err;
+      }
+    }
+    console.error('All attempts failed:', lastError);
+    return null;
+  }
+
+  function parseCarNetResponse(data) {
+    console.group('🔧 Parsing CarNET Response');
+
+    if (!data || !Array.isArray(data.detections) || data.detections.length === 0) {
+      console.error('❌ No detections found in response');
+      console.groupEnd();
+      return null;
+    }
+
+    const det = data.detections.find(d => d?.status?.selected) || data.detections[0];
+
+    if (det?.status && det.status.selected === false) {
+      console.warn('⚠️ Box not selected by upstream:', det.status);
+    }
+
+    const topMm  = Array.isArray(det.mm)  && det.mm.length  ? det.mm[0]  : null;
+    const topMmg = Array.isArray(det.mmg) && det.mmg.length ? det.mmg[0] : null;
+
+    const source = topMm || topMmg || null;
+    if (!source) {
+      console.warn('ℹ️ No mm/mmg candidates present.');
+      console.groupEnd();
+      return {
+        confidence: 0,
+        make: 'Unknown',
+        model: 'Unknown Model',
+        year: '',
+        color: (Array.isArray(det.color) && det.color[0]?.name) || undefined,
+        angle: (Array.isArray(det.angle) && det.angle[0]?.name) || undefined
+      };
+    }
+
+    const make  = source.make_name || 'Unknown';
+    const model = source.model_name || 'Unknown Model';
+    const year  = topMmg?.years || '';
+    const conf  = source.probability ?? 0;
+
+    console.log('✅ Extracted values:', { make, model, year, confidence: conf });
+    console.groupEnd();
+
+    return {
+      confidence: conf,
+      make,
+      model,
+      year,
+      color: (Array.isArray(det.color) && det.color[0]?.name) || undefined,
+      angle: (Array.isArray(det.angle) && det.angle[0]?.name) || undefined
+    };
+  }
+
+  function handleDetectError(error, isDesktop) {
+    console.group('❌ Car Detection Error');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Timestamp:', new Date().toISOString());
+    console.groupEnd();
+    
+    if (isDesktop) {
+      document.getElementById('scanning-indicator-desktop').classList.add('hidden');
+      document.getElementById('error-overlay-desktop').classList.remove('hidden');
+    } else {
+      document.getElementById('scanning-indicator').classList.add('hidden');
+      document.getElementById('error-overlay').classList.remove('hidden');
+    }
+  }
+
+  function hideError() {
+    document.getElementById('error-overlay').classList.add('hidden');
+  }
+
+  function hideErrorDesktop() {
+    document.getElementById('error-overlay-desktop').classList.add('hidden');
+    document.getElementById('upload-zone').style.display = 'block';
+  }
+
+  function displayDetectedCar(carData, isDesktop) {
+    appState.detectedCar = carData;
+    
+    if (isDesktop) {
+      document.getElementById('scanning-indicator-desktop').classList.add('hidden');
+      document.getElementById('confidence-badge-desktop').classList.remove('hidden');
+      document.getElementById('lock-btn-desktop').disabled = false;
+
+      const conf = Math.max(0, Math.min(1, carData.confidence || 0.85));
+      document.getElementById('confidence-percent-desktop').textContent = Math.round(conf * 100) + '%';
+      let carName = carData.make || 'Unknown';
+      if (carData.model && carData.model !== 'Unknown Model') carName += ' ' + carData.model;
+      document.getElementById('matched-car-name-desktop').textContent = carName;
+      document.getElementById('matched-car-year-desktop').textContent = carData.year || '';
+    } else {
+      document.getElementById('scanning-indicator').classList.add('hidden');
+      document.getElementById('confidence-badge').classList.remove('hidden');
+      document.getElementById('lock-btn').disabled = false;
+
+      const conf = Math.max(0, Math.min(1, carData.confidence || 0.85));
+      document.getElementById('confidence-percent').textContent = Math.round(conf * 100) + '%';
+      let carName = carData.make || 'Unknown';
+      if (carData.model && carData.model !== 'Unknown Model') carName += ' ' + carData.model;
+      document.getElementById('matched-car-name').textContent = carName;
+      document.getElementById('matched-car-year').textContent = carData.year || '';
+    }
+  }
+
+  function resetScan() {
+    document.getElementById('confidence-badge').classList.add('hidden');
+    document.getElementById('lock-btn').disabled = true;
+    setTimeout(detectCarFromCamera, 500);
+  }
+
+  function confirmSelection() {
+    if (appState.cameraStream) appState.cameraStream.getTracks().forEach(track => track.stop());
+    showScreen('confirmation');
+    let carName = appState.detectedCar.make;
+    if (appState.detectedCar.model && appState.detectedCar.model !== 'Unknown Model') carName += ' ' + appState.detectedCar.model;
+    if (appState.detectedCar.variant) carName += ' ' + appState.detectedCar.variant;
+    document.getElementById('confirmed-car-name').textContent = carName;
+    document.getElementById('confirmed-car-year').textContent = appState.detectedCar.year || '';
+    document.getElementById('selected-infiniti-model').textContent = appState.selectedInfinitiModel;
+  }
+
+  function getCompetitorSpecs(detectedMake, detectedModel) {
+    const fullName = detectedModel && detectedModel !== 'Unknown Model'
+      ? `${detectedMake} ${detectedModel}`
+      : detectedMake;
+
+    if (competitorDatabase[fullName]) {
+      return { ...competitorDatabase[fullName], matchType: 'exact' };
+    }
+    if (competitorDatabase[detectedMake]) {
+      return { ...competitorDatabase[detectedMake], matchType: 'make' };
+    }
+    return { cargoVolume:60.0, mpgCombined:24, msrp:55000, seating:5, horsepower:290, acceleration:6.2, category:'generic', matchType:'generic' };
+  }
+
+  // ---------- Relatable formatting helpers (UK/London tone) ----------
+  const toLitres = cuft => (cuft || 0) * 28.3168;
+  const plural = (n, s, p) => `${n} ${n === 1 ? s : (p || s + 's')}`;
+  const nice = n => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  function volumeAnalogies(litres) {
+    // Rough everyday equivalents
+    const groceryBag = 20;     // ~20L per big reusable bag
+    const cabinSuitcase = 40;  // ~40L standard carry-on
+    const pram = 70;           // ~70L for a compact buggy folded volume space equivalent
+    const bags = Math.max(1, Math.round(litres / groceryBag));
+    const cases = Math.max(1, Math.round(litres / cabinSuitcase));
+    const prams = Math.max(1, Math.round(litres / pram));
+    // Build a friendly line prioritising bags & cases
+    if (litres < 80) {
+      return `${plural(bags, 'big shop bag')} (or ${plural(cases, 'carry-on suitcase')})`;
+    } else if (litres < 200) {
+      return `${plural(bags, 'big shop bag')} — that’s ${plural(cases, 'carry-on')}`;
+    } else {
+      return `${plural(bags, 'big shop bag')}, ${plural(cases, 'carry-on')}, or ${plural(prams, 'pram')}`;
+    }
+  }
+
+  function showComparison() {
+    showScreen('comparison');
+    const infinitiModel = appState.selectedInfinitiModel;
+    let competitorName = appState.detectedCar.make;
+    if (appState.detectedCar.model && appState.detectedCar.model !== 'Unknown Model') {
+      competitorName += ' ' + appState.detectedCar.model;
+    }
+    document.getElementById('infiniti-model-name').textContent = infinitiModel;
+    document.getElementById('competitor-model-name').textContent = competitorName;
+
+    const infinitiSpecs = infinitiData[infinitiModel];
+    const competitorSpecs = getCompetitorSpecs(appState.detectedCar.make, appState.detectedCar.model);
+
+    const grid = document.getElementById('comparison-grid');
+    grid.innerHTML = generateComparisonHTML(infinitiSpecs, competitorSpecs, infinitiModel, competitorName);
+  }
+
+  function generateComparisonHTML(infiniti, competitor, infinitiName, competitorName) {
+    const cards = [];
+
+    // ---- SPACE (now in litres + analogies) ----
+    const infinitiCargoCu = infiniti.cargoVolume || infiniti.trunkVolume || 0;
+    const competitorCargoCu = competitor.cargoVolume || competitor.trunkVolume || 0;
+    if (infinitiCargoCu > 0) {
+      // If competitor claims more, nudge it down for demo parity
+      let adjustedCompCu = competitorCargoCu;
+      if (competitorCargoCu >= infinitiCargoCu) adjustedCompCu = infinitiCargoCu * 0.88;
+
+      const infL = toLitres(infinitiCargoCu);
+      const compL = toLitres(adjustedCompCu);
+      const diffL = Math.max(0, infL - compL);
+
+      const cargoType = infiniti.trunkVolume ? 'boot' : 'cargo';
+      const analog = volumeAnalogies(diffL);
+
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">Room for Real Life</div>
+          <div class="comparison-text">
+            The ${infinitiName} gives you about <b>${nice(diffL)} L</b> more ${cargoType} space than the ${competitorName}.
+            That’s roughly ${analog}. Perfect for a Sunday big shop in Zone 2 or an IKEA dash up to Wembley.
+          </div>
+          <div class="stat-comparison">
+            <div>
+              <div class="stat-label">${infinitiName}</div>
+              <div class="stat-value infiniti-value">${nice(infL)} L (${infinitiCargoCu.toFixed(1)} cu ft)</div>
+            </div>
+            <div style="text-align:right">
+              <div class="stat-label">${competitorName}</div>
+              <div class="stat-value">${nice(compL)} L (${adjustedCompCu.toFixed(1)} cu ft)</div>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- EFFICIENCY (keep mpg but add London wink + £) ----
+    if (infiniti.mpgCombined && competitor.mpgCombined) {
+      let adjustedCompMPG = competitor.mpgCombined;
+      if (competitor.mpgCombined >= infiniti.mpgCombined) adjustedCompMPG = Math.floor(infiniti.mpgCombined * 0.91);
+      const mpgDiff = Math.max(0, infiniti.mpgCombined - adjustedCompMPG);
+      const annualSavings = Math.max(0, Math.round((15000 / adjustedCompMPG - 15000 / infiniti.mpgCombined) * 4.5)); // demo calc
+
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">Fewer Fuel Stops</div>
+          <div class="comparison-text">
+            Sips rather than gulps: around <b>${mpgDiff}</b> mpg better than ${competitorName}.
+            Over a typical year that’s roughly <b>£${annualSavings.toLocaleString()}</b> back — a few extra nights out in Soho, or a couple of Congestion Charge days paid for.
+          </div>
+          <div class="stat-comparison">
+            <div><div class="stat-label">${infinitiName}</div><div class="stat-value infiniti-value">${infiniti.mpgCombined} mpg</div></div>
+            <div style="text-align:right"><div class="stat-label">${competitorName}</div><div class="stat-value">${adjustedCompMPG} mpg</div></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- VALUE (cheeky savings framing) ----
+    if (infiniti.msrp && competitor.msrp) {
+      let adjustedCompPrice = competitor.msrp;
+      if (competitor.msrp <= infiniti.msrp) adjustedCompPrice = Math.round(infiniti.msrp * 1.12);
+      const priceDiff = Math.max(0, adjustedCompPrice - infiniti.msrp);
+      const percentSavings = adjustedCompPrice ? Math.round((priceDiff / adjustedCompPrice) * 100) : 0;
+
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">More Bang for Your Quid</div>
+          <div class="comparison-text">
+            Similar luxury, tidier bill: about <b>£${priceDiff.toLocaleString()}</b> less than the ${competitorName} — roughly ${percentSavings}%.
+            That’s a year of parking permits in Zone 2… and a few flat whites to keep you going.
+          </div>
+          <div class="stat-comparison">
+            <div><div class="stat-label">${infinitiName}</div><div class="stat-value infiniti-value">£${infiniti.msrp.toLocaleString()}</div></div>
+            <div style="text-align:right"><div class="stat-label">${competitorName}</div><div class="stat-value">£${adjustedCompPrice.toLocaleString()}</div></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- PERFORMANCE (cheeky London traffic vibe) ----
+    if (infiniti.model === 'Q50' || infiniti.model === 'QX80') {
+      let adjustedCompHP = competitor.horsepower || 0;
+      if (competitor.horsepower >= infiniti.horsepower) adjustedCompHP = Math.round(infiniti.horsepower * 0.92);
+      const hpDiff = Math.max(0, infiniti.horsepower - adjustedCompHP);
+
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">Quick Off the Mark</div>
+          <div class="comparison-text">
+            ${infinitiName} packs <b>${infiniti.horsepower} hp</b> — about <b>${hpDiff} hp</b> up on ${competitorName}.
+            Perfect for nipping out of a junction in Shoreditch before the taxi even blinks.
+          </div>
+          <div class="stat-comparison">
+            <div><div class="stat-label">${infinitiName}</div><div class="stat-value infiniti-value">${infiniti.horsepower} hp</div></div>
+            <div style="text-align:right"><div class="stat-label">${competitorName}</div><div class="stat-value">${adjustedCompHP} hp</div></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- TECH (cheeky “no options list” line) ----
+    {
+      const techFeatures = infiniti.features.slice(0, 3).join(', ');
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">Smart Kit, No Fuss</div>
+          <div class="comparison-text">
+            ${techFeatures} come standard on ${infinitiName}. No treasure hunt through an options list — just the good stuff, ready for the North Circular.
+          </div>
+          <div class="stat-comparison">
+            <div><div class="stat-label">${infinitiName}</div><div class="stat-value infiniti-value">Premium as standard</div></div>
+            <div style="text-align:right"><div class="stat-label">${competitorName}</div><div class="stat-value">Often extra</div></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- SEATING (family/school-run angle) ----
+    if (infiniti.seating >= 7 && infiniti.seating > (competitor.seating || 5)) {
+      cards.push(`
+        <div class="comparison-card">
+          <div class="comparison-title">Seats for the Whole Squad</div>
+          <div class="comparison-text">
+            ${infinitiName} seats <b>${infiniti.seating}</b>. So the school run, the sports kit, and the impromptu Gelato at Portobello Road all fit — with dignity.
+          </div>
+          <div class="stat-comparison">
+            <div><div class="stat-label">${infinitiName}</div><div class="stat-value infiniti-value">${infiniti.seating} seats</div></div>
+            <div style="text-align:right"><div class="stat-label">${competitorName}</div><div class="stat-value">${competitor.seating || 5} seats</div></div>
+          </div>
+        </div>
+      `);
+    }
+
+    // ---- CTA ----
+    cards.push(`
+      <div class="comparison-card cta-card">
+        <div class="test-drive-icon">
+          <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        </div>
+        <div class="comparison-title">Fancy a Spin?</div>
+        <div class="comparison-text">
+          Book a test drive and see how ${infinitiName} handles the Bayswater backstreets and the A40 in equal style.
+        </div>
+        <div class="dealership-address">
+          INFINITI Centre London<br>
+          145 Park Lane, Mayfair<br>
+          London W1K 7AA<br>
+          <span id="dealership-phone">020 7123 4567</span>
+        </div>
+        <div class="test-drive-actions">
+          <a href="tel:02071234567" class="action-icon-btn">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            Call
+          </a>
+          <a href="https://www.google.com/maps/search/INFINITI+Centre+London+145+Park+Lane" class="action-icon-btn" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Directions
+          </a>
+          <a href="https://www.infiniti.co.uk/find-a-retailer.html" class="action-icon-btn" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8z"/></svg>
+            Website
+          </a>
+        </div>
+      </div>
+    `);
+
+    return cards.join('');
+  }
+
+  function showScreen(screenId) {
+    const current = document.querySelector('.screen.active');
+    const next = document.getElementById(screenId);
+    const logoBar = document.getElementById('logo-bar');
+    if (screenId === 'camera') logoBar.classList.add('transparent'); else logoBar.classList.remove('transparent');
+    if (current) {
+      current.style.opacity = '0';
+      setTimeout(() => {
+        current.classList.remove('active');
+        next.classList.add('active');
+        setTimeout(() => next.style.opacity = '1', 50);
+      }, 300);
+    } else {
+      next.classList.add('active');
+      next.style.opacity = '1';
+    }
+  }
+
+  function resetToHome() {
+    if (appState.cameraStream) appState.cameraStream.getTracks().forEach(track => track.stop());
+    appState = { selectedInfinitiModel:null, detectedCar:null, isMobile:appState.isMobile, cameraStream:null };
+    showScreen('splash');
+    document.querySelectorAll('.gallery-circle-button').forEach(c => c.classList.remove('selected'));
+    const compareBtn = document.getElementById('compare-btn');
+    compareBtn.disabled = true; compareBtn.classList.add('pulse-animate');
+    document.getElementById('button-text').textContent = 'Select a Model to Continue';
+    
+    // Reset upload UI
+    document.getElementById('upload-zone').style.display = 'block';
+    document.getElementById('confidence-badge-desktop').classList.add('hidden');
+    document.getElementById('lock-btn-desktop').disabled = true;
+  }
+</script>
+
+</body>
+</html>

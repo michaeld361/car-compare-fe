@@ -1,0 +1,221 @@
+.splashScreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--infiniti-navy);
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.logoBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: var(--infiniti-navy);
+  padding: 1.25rem 4%;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.logo {
+  width: 3.4375rem;
+  height: auto;
+  color: var(--infiniti-white);
+}
+
+.splashContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.contentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 10;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 120%;
+  margin-left: 4%;
+  margin-right: 4%;
+  margin-top: 6rem;
+  position: relative;
+  z-index: 10;
+}
+
+.bodyCopy {
+  font-size: 1.125rem;
+  font-weight: 300;
+  line-height: 140%;
+  margin-left: 4%;
+  margin-right: 4%;
+  position: relative;
+  z-index: 10;
+  max-width: 92%;
+  margin-top: 4%;
+}
+
+.carouselContainer {
+  width: 100%;
+  margin-top: 8%;
+  position: relative;
+  z-index: 100;
+  padding-left: 4%;
+  padding-top: 3rem;
+  padding-bottom: 20px;
+}
+
+.carouselWrapper {
+  width: 100%;
+  overflow-x: scroll;
+  overflow-y: visible;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  position: relative;
+  padding: 2rem 0;
+  z-index: 100;
+}
+
+.carouselWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  padding-right: 50%;
+  align-items: center;
+}
+
+.galleryItemWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+.galleryCircleButton {
+  flex: 0 0 auto;
+  width: clamp(200px, 35vh, 280px);
+  height: clamp(200px, 35vh, 280px);
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--infiniti-white);
+  cursor: pointer;
+  border: 3px solid transparent;
+  position: relative;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  padding: 0;
+}
+
+.galleryCircleButton.selected {
+  border-color: var(--infiniti-white);
+  transform: scale(1.08);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+}
+
+.carImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.galleryLabel {
+  color: var(--infiniti-white);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.02rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.buttonWrapper {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0 6rem 0;
+  min-height: 120px;
+  position: relative;
+  z-index: 10;
+}
+
+.button {
+  width: 70%;
+  max-width: 20rem;
+  color: white;
+  border: 1px solid white;
+  display: flex;
+  padding: 0.7375rem 1.5rem;
+  border-radius: 2.5rem;
+  font-size: 1rem;
+  background-color: var(--infiniti-button-bg);
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button:not(:disabled):hover {
+  background-color: var(--infiniti-white);
+  color: var(--infiniti-navy);
+}
+
+.chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(-45deg);
+  margin-left: 0.5rem;
+}
+
+.pulseAnimate {
+  animation: pulseOpacity 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseOpacity {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
