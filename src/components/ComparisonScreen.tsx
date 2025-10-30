@@ -218,9 +218,9 @@ const ComparisonScreen: React.FC<ComparisonScreenProps> = ({
   return (
     <div className={styles.comparisonScreen}>
       <div className={styles.logoBar} onClick={onBack}>
-        <svg className={styles.logo} viewBox="0 0 55 55" fill="currentColor">
-          <path d="M27.5 0L0 15.714v23.572L27.5 55l27.5-15.714V15.714L27.5 0zm0 6.429l21.786 12.428v18.286L27.5 49.571 5.714 37.143V18.857L27.5 6.429z" />
-        </svg>
+            <svg class="logo" width="70" height="51" viewBox="0 0 108 51" fill="none">
+      <path d="M53.7843 1.32572C28.8513 1.32572 8.75219 11.5568 8.75219 23.8515C8.75219 30.8202 16.9563 36.2672 29.3761 39.2875L51.0729 13.7933H53.7843L35.0087 51C14.5656 47.3917 0 38.0021 0 26.5721C0 11.8739 24.0933 0 53.7843 0C83.4752 0 107.569 11.8739 107.569 26.5721C107.569 38.0021 93.0029 47.3917 72.5598 51L53.7843 13.7933H56.4956L78.1866 39.2875C90.6122 36.2672 98.8105 30.8202 98.8105 23.8515C98.8105 11.5568 78.7114 1.32572 53.7784 1.32572H53.7843Z" fill="white"/>
+    </svg>
       </div>
 
       <div className={styles.comparisonHeader}>

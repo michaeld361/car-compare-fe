@@ -1,5 +1,5 @@
 import { DetectedCar } from '../types';
-import { competitorDatabase } from '../data/carModels';
+import { getCompetitorSpecs } from '../data/carModels';
 
 // Get API URL from environment variables
 const API_URL = import.meta.env.VITE_CAR_DETECTION_API_URL || 'http://127.0.0.1:8787';
@@ -158,26 +158,27 @@ function parseCarNetResponse(data: any): DetectedCar | null {
   const conf = source.probability ?? 0;
 
   console.log('✅ Extracted values:', { make, model, year, confidence: conf });
-  console.groupEnd();
 
-  // Try to find specs in competitor database
-  const carKey = `${make} ${model}`.trim();
-  const competitor = competitorDatabase[carKey as keyof typeof competitorDatabase];
+  // Use the getCompetitorSpecs function for guaranteed data
+  const specs = getCompetitorSpecs(make, model);
+
+  console.log('📊 Using specs:', specs);
+  console.groupEnd();
 
   return {
     make,
     model,
     year,
     confidence: Math.round(conf * 100),
-    specs: competitor ? {
-      horsepower: competitor.horsepower,
+    specs: {
+      horsepower: specs.horsepower || 280,
       torque: 0,
-      acceleration: competitor.acceleration,
-      mpg: competitor.mpgCombined,
+      acceleration: specs.acceleration || 6.5,
+      mpg: specs.mpgCombined || 24,
       fuelType: 'Petrol',
-      seating: competitor.seating,
-      cargo: competitor.cargoVolume || 0
-    } : {}
+      seating: specs.seating || 5,
+      cargo: specs.cargoVolume || specs.trunkVolume || 60
+    }
   };
 }
 

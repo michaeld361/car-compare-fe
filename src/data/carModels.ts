@@ -143,3 +143,91 @@ export const competitorDatabase: Record<string, any> = {
   'Genesis': { cargoVolume: 12.0, mpgCombined: 26, msrp: 42000, seating: 5, horsepower: 260, acceleration: 6.2, category: 'generic' },
   'Land Rover': { cargoVolume: 70.0, mpgCombined: 20, msrp: 90000, seating: 7, horsepower: 380, acceleration: 5.8, category: 'generic' }
 };
+
+/**
+ * Get competitor specs with fallback to dummy data
+ * This ensures we ALWAYS have data for comparison
+ */
+export function getCompetitorSpecs(make: string, model: string): any {
+  // Try exact match first (Make Model)
+  const exactKey = `${make} ${model}`;
+  if (competitorDatabase[exactKey]) {
+    console.log(`✅ Found exact match for: ${exactKey}`);
+    return competitorDatabase[exactKey];
+  }
+
+  // Try just the make
+  if (competitorDatabase[make]) {
+    console.log(`✅ Found make match for: ${make}`);
+    return competitorDatabase[make];
+  }
+
+  // Generate realistic dummy data based on make
+  console.log(`ℹ️ Generating dummy data for: ${make} ${model}`);
+  return generateDummySpecs(make, model);
+}
+
+/**
+ * Generate realistic dummy specs for any car
+ */
+function generateDummySpecs(make: string, model: string): any {
+  // Luxury brands get higher specs
+  const luxuryBrands = ['BMW', 'Mercedes', 'Audi', 'Lexus', 'Infiniti', 'Cadillac', 'Lincoln', 'Genesis', 'Porsche', 'Jaguar', 'Land Rover', 'Range Rover', 'Volvo'];
+  const isLuxury = luxuryBrands.some(brand => make.toUpperCase().includes(brand.toUpperCase()));
+
+  // Economy brands get lower specs
+  const economyBrands = ['Toyota', 'Honda', 'Nissan', 'Hyundai', 'Kia', 'Mazda', 'Subaru', 'Ford', 'Chevrolet', 'Dodge'];
+  const isEconomy = economyBrands.some(brand => make.toUpperCase().includes(brand.toUpperCase()));
+
+  // SUV/Crossover models (check model name)
+  const isSUV = /X\d|Q\d|RX|GX|NX|UX|XT|CX|RAV|CR-V|PILOT|EXPLORER|TAHOE|SUBURBAN|YUKON|ESCALADE|NAVIGATOR|EXPEDITION/i.test(model);
+  const isSedan = /\d\s?SERIES|\dSERIES|A\d|C\d|E\d|S\d|3|5|7|ACCORD|CAMRY|ALTIMA|SONATA|ELANTRA|CIVIC|COROLLA/i.test(model);
+
+  let baseSpecs;
+
+  if (isSUV) {
+    baseSpecs = {
+      cargoVolume: isLuxury ? 70 : 60,
+      mpgCombined: isLuxury ? 22 : 26,
+      msrp: isLuxury ? 60000 : 35000,
+      seating: 7,
+      horsepower: isLuxury ? 300 : 250,
+      acceleration: isLuxury ? 6.0 : 7.5,
+      category: 'suv'
+    };
+  } else if (isSedan) {
+    baseSpecs = {
+      trunkVolume: 13.0,
+      mpgCombined: isLuxury ? 25 : 30,
+      msrp: isLuxury ? 45000 : 28000,
+      seating: 5,
+      horsepower: isLuxury ? 280 : 200,
+      acceleration: isLuxury ? 5.8 : 7.2,
+      category: 'sedan'
+    };
+  } else {
+    // Default to crossover
+    baseSpecs = {
+      cargoVolume: isLuxury ? 65 : 55,
+      mpgCombined: isLuxury ? 23 : 27,
+      msrp: isLuxury ? 55000 : 32000,
+      seating: 5,
+      horsepower: isLuxury ? 280 : 220,
+      acceleration: isLuxury ? 6.5 : 7.8,
+      category: 'crossover'
+    };
+  }
+
+  // Add some variation (+/- 10%)
+  const variation = 0.9 + Math.random() * 0.2;
+  return {
+    cargoVolume: Math.round((baseSpecs.cargoVolume || 60) * variation),
+    mpgCombined: Math.round((baseSpecs.mpgCombined || 24) * variation),
+    msrp: Math.round((baseSpecs.msrp || 50000) * variation),
+    seating: baseSpecs.seating,
+    horsepower: Math.round((baseSpecs.horsepower || 280) * variation),
+    acceleration: parseFloat(((baseSpecs.acceleration || 6.5) * variation).toFixed(1)),
+    category: baseSpecs.category,
+    trunkVolume: baseSpecs.trunkVolume
+  };
+}

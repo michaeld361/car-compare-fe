@@ -20,9 +20,7 @@ body {
   width: 100vw;
   background-color: var(--infiniti-navy);
   color: var(--infiniti-white);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Infiniti Brand';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -150,4 +148,33 @@ input,
 textarea {
   user-select: text;
   -webkit-user-select: text;
+}
+
+
+
+@font-face {
+  font-family: 'Infiniti Brand';
+  src: url('../assets/fonts/InfinitiBrand-Bold.woff2') format('woff2'),
+       url('../assets/fonts/InfinitiBrand-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Infiniti Brand';
+  src: url('../assets/fonts/InfinitiBrand-Light.woff2') format('woff2'),
+       url('../assets/fonts/InfinitiBrand-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Infiniti Brand';
+  src: url('../assets/fonts/InfinitiBrand-Regular.woff2') format('woff2'),
+       url('../assets/fonts/InfinitiBrand-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
